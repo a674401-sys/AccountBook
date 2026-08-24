@@ -204,10 +204,9 @@ html { background: #F2F3ED; }
           </div>
           <div class="chips" id="chips" role="group" aria-label="分類">
             <button class="chip" data-cat="食">食</button>
-            <button class="chip" data-cat="衣">衣</button>
-            <button class="chip" data-cat="住">住</button>
             <button class="chip" data-cat="行">行</button>
-            <button class="chip" data-cat="其他">其他</button>
+            <button class="chip" data-cat="想要">想要</button>
+            <button class="chip" data-cat="必要">必要</button>
           </div>
           <div class="pt" id="payers" role="group" aria-label="誰付的">
             <button data-payer="me" class="on">我付的</button>
@@ -239,7 +238,6 @@ html { background: #F2F3ED; }
   "use strict";
   var $ = function (s) { return document.querySelector(s); };
 
-  var CATS = ["食", "衣", "住", "行", "其他"];
   var PAYER_LABEL = { me: "我", partner: "寶貝", third: "第三人" };
   var WEEK = ["日", "一", "二", "三", "四", "五", "六"];
   var CN_MONTH = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"];
@@ -325,13 +323,9 @@ html { background: #F2F3ED; }
   // ── 畫面 ──
   function renderSummary() {
     var total = S.items.reduce(function (s, i) { return s + i.amount; }, 0);
-    var byCat = CATS.map(function (c) {
-      return {
-        c: c,
-        v: S.items.filter(function (i) { return i.cat === c; })
-                  .reduce(function (s, i) { return s + i.amount; }, 0)
-      };
-    }).filter(function (x) { return x.v > 0; })
+    var catMap = {};
+    S.items.forEach(function (i) { catMap[i.cat] = (catMap[i.cat] || 0) + i.amount; });
+    var byCat = Object.keys(catMap).map(function (c) { return { c: c, v: catMap[c] }; })
       .sort(function (a, b) { return b.v - a.v; });
     var maxCat = byCat.length ? byCat[0].v : 0;
     var bp = { me: 0, partner: 0, third: 0 };
