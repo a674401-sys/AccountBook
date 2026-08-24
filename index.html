@@ -285,7 +285,8 @@ html { background: #F2F3ED; }
   function friendly(err) {
     var m = String(err && err.message || err);
     if (m.indexOf("unauthorized") >= 0) return "通行碼不正確,或 Apps Script 還沒部署最新版本。";
-    if (m.indexOf("Failed to fetch") >= 0 || m.indexOf("NetworkError") >= 0) return "連不到 Apps Script,請確認網路與網址。";
+    if (m.indexOf("Failed to fetch") >= 0 || m.indexOf("NetworkError") >= 0) return "連不到 Apps Script。常見原因:部署時「誰可以存取」沒選「所有人」,或網址貼錯。";
+    if (m.indexOf("Unexpected token") >= 0 || m.indexOf("JSON") >= 0) return "Apps Script 有回應但不是資料。通常是部署時「誰可以存取」沒選「所有人」,或貼到的不是結尾 /exec 的部署網址。";
     return m;
   }
   function handle(r) {
@@ -544,7 +545,7 @@ html { background: #F2F3ED; }
   function cfgError(msg) {
     var el = $("#cfg_err");
     el.textContent = msg;
-    el.style.display = "";
+    el.style.display = "block";
   }
 
   $("#cfg_open").onclick = showSetup;
@@ -556,6 +557,10 @@ html { background: #F2F3ED; }
     var token = $("#cfg_token").value.trim();
     if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) {
       cfgError("網址格式不對,應該是 https://script.google.com/macros/s/…/exec");
+      return;
+    }
+    if (url.indexOf("/exec") < 0) {
+      cfgError("這不是部署網址:請到 Apps Script 的「部署 → 管理部署作業」複製結尾是 /exec 的網頁應用程式網址(不是編輯器的網址)。");
       return;
     }
     if (!token) { cfgError("請輸入通行碼(和 Code.gs 裡的 TOKEN 一致)。"); return; }
